@@ -31,6 +31,7 @@ class Knn:
         assert len(train) == len(train_labels)
         self.X_train = train
         self.y_train = train_labels
+        self.n_class = len(np.unique(train_labels))
 
     def getNeighbors(self, X_test_row):
         '''
@@ -40,14 +41,15 @@ class Knn:
             k-nearest neighbors to the test data
         '''
         distances = []
-        for i, X_train_row in enumerate(self.X_train):
-            distances.append([X_train_row, self.euclidean_distance(X_test_row, X_train_row), self.y_train[i]])
+        for X_train_row, y_train_row in zip(self.X_train, self.y_train):
+            distances.append([X_train_row, self.euclidean_distance(X_test_row, X_train_row), y_train_row])
         distances.sort(key=lambda distances: distances[1])
 
-        neighbors = []
+        K_neighbors = []
         for i in range(self.K):
-            neighbors.append(distances[i])
-        return neighbors
+            K_neighbors.append(distances[i])
+        
+        return K_neighbors
 
 
     def predict(self, X):
@@ -56,7 +58,6 @@ class Knn:
         exemple est de taille 1xm
         """
         y_pred = []
-        
         for X_test_row in X:
             K_neighbors = self.getNeighbors(X_test_row)
             classes = [row[-1] for row in K_neighbors]
@@ -65,39 +66,37 @@ class Knn:
         
         return np.array(y_pred)
 
-    def accuracy(self):
-        """
-        Calcul l'accuracy avec :
-        ACC = (TP + TN) / (TP + TN + FP + FN)
-        """
-        return (self.TP + self.TN) / (self.TP + self.TN + self.FP + self.FN)
-
-    def precision(self):
-        """
-        Calcul la precision avec :
-        PPV = (TP) / (TP + FP)
-        """
-        return (self.TP) / (self.TP + self.FP)
-
-    def recall(self):
-        """
-        Calcul le recall avec :
-        TPR = (TP) / (TP + FN)
-        """
-        return (self.TP) / (self.TP + self.FN)
-
-    def f1_score(self):
-        """
-        Calcul le f1_score avec :
-        ACC = 2 * (PPV * TPR) / (PPV + TPR)
-        """
-        return (2 * self.precision() * self.recall()) / (self.precision() + self.recall())
-
-    def confusion_matrix(self):
+    def confusion_matrix(self, y_pred, y):
         """
         retourne la matrice de confusion
         """
-        return np.array([[self.TP, self.FP], [self.FN, self.TN]])
+        cf = np.zeros((3, 3), dtype='int64')
+        for yi, yhat in zip(y, y_pred):
+            for i in range(self.n_class):
+                for j in range(self.n_class):
+                    if yi == i and yhat == j:
+                        cf[i, j] += 1
+        return cf
+
+    def mean_precision(self, cf):
+        self.precisions = []
+        for i, row in enumerate(cf):
+            self.precisions.append(row[i] / np.sum(row))
+        return np.mean(self.precisions)
+
+    def mean_recall(self, cf):
+        self.recalls = []
+        for i, row in enumerate(np.transpose(cf)):
+            self.recalls.append(row[i] / np.sum(row))
+        return np.mean(self.recalls)
+
+    def mean_F1_score(self):
+        assert len(self.precisions) != 0 and len(self.recalls)
+        
+        self.F1_scores = []
+        for precision, recall in zip(self.precisions, self.recalls):
+            self.F1_scores.append((2 * precision * recall) / (precision + recall))
+        return np.mean(self.F1_scores)
 
     def evaluate(self, X, y):
         """
@@ -110,17 +109,22 @@ class Knn:
 
         vous pouvez rajouter d'autres arguments, il suffit juste de
         les expliquer en commentaire
+
+        F1 = (2 * self.precision() * self.recall()) / (self.precision() + self.recall())
+
         """
         y_pred = self.predict(X)
-
-        self.TP = np.sum(y[y==1] == y_pred[y==1])
-        self.TN = np.sum(y[y==0] == y_pred[y==0])
-        self.FP = np.sum(y[y==0] != y_pred[y==0])
-        self.FN = np.sum(y[y==1] != y_pred[y==1])
-
-        return {'Accuracy': self.accuracy(), 
-                'Precision': self.precision(), 
-                'Recall': self.recall(), 
-                'F1-score': self.f1_score(), 
-                'Confusion_matrix': self.confusion_matrix()
+        cf = self.confusion_matrix(y_pred, y)
+        
+        # Metrics
+        accuracy = np.trace(cf) / len(y)
+        precision = self.mean_precision(cf)
+        recall = self.mean_recall(cf)
+        F1_score = self.mean_F1_score()
+            
+        return {'mean accuracy': accuracy, 
+                'mean precision': precision, 
+                'mean recall': recall, 
+                'mean F1-score': F1_score, 
+                'Confusion_matrix': cf
                 }
