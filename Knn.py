@@ -91,7 +91,7 @@ class Knn:
         return np.mean(self.recalls)
 
     def mean_F1_score(self):
-        assert len(self.precisions) != 0 and len(self.recalls)
+        assert len(self.precisions) and len(self.recalls)
         
         self.F1_scores = []
         for precision, recall in zip(self.precisions, self.recalls):
