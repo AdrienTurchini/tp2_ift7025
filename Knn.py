@@ -11,10 +11,7 @@ class Knn:
         self.K = K
 
     def euclidean_distance(self, x1, x2):
-        distance = 0
-        for i in range(len(x1) - 1):
-            distance += (x1[i] - x2[i])**2
-        return distance**0.5
+        return (((x1 - x2)**2).sum())**0.5
 
     def train(self, train, train_labels):  # vous pouvez rajouter d'autres attributs au besoin
         """
@@ -122,9 +119,9 @@ class Knn:
         recall = self.mean_recall(cf)
         F1_score = self.mean_F1_score()
             
-        return {'mean accuracy': accuracy, 
-                'mean precision': precision, 
-                'mean recall': recall, 
-                'mean F1-score': F1_score, 
+        return {'mean_accuracy': accuracy, 
+                'mean_precision': precision, 
+                'mean_recall': recall, 
+                'mean_F1-score': F1_score, 
                 'Confusion_matrix': cf
                 }

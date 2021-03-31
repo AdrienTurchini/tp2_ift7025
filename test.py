@@ -86,10 +86,3 @@ class  NaiveBayes:
 clf = NaiveBayes()
 clf.train(train = X, train_labels= y)
 clf.predict(data)
-
-
-
-
-
-
-
