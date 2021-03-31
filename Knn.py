@@ -67,7 +67,7 @@ class Knn:
         """
         retourne la matrice de confusion
         """
-        cf = np.zeros((3, 3), dtype='int64')
+        cf = np.zeros((self.n_class, self.n_class), dtype='int64')
         for yi, yhat in zip(y, y_pred):
             for i in range(self.n_class):
                 for j in range(self.n_class):

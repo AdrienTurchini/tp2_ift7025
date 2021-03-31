@@ -54,15 +54,21 @@ En gros, vous allez :
 """
 
 # Initialisez vos paramètres
-K_values = [k for k in range(1, 21)]
+K_values_iris = [k for k in range(1, 11)]
+K_values_wine = [k for k in range(1, 51)]
+K_values_abalone = [k for k in range(1, 51)]
 
 # Initialisez/instanciez vos classifieurs avec leurs paramètres
 
 
 # Charger/lire les datasets
-X_train_iris, y_train_iris, X_test_iris, y_test_iris = load_iris_dataset(train_ratio=0.7, seed=42, shuffle=True)
-X_train_wine, y_train_wine, X_test_wine, y_test_wine = load_wine_dataset(train_ratio=0.7, seed=42, shuffle=True)
-X_train_abalone, y_train_abalone, X_test_abalone, y_test_abalone = load_abalone_dataset(train_ratio=0.7, seed=42, shuffle=True)
+X_train_iris, y_train_iris, X_test_iris, y_test_iris = load_iris_dataset(train_ratio=0.7, seed=69, shuffle=True)
+X_train_wine, y_train_wine, X_test_wine, y_test_wine = load_wine_dataset(train_ratio=0.7, seed=42, shuffle=False)
+X_train_abalone, y_train_abalone, X_test_abalone, y_test_abalone = load_abalone_dataset(train_ratio=0.7, seed=42, shuffle=False)
+
+# Pop une valeur de train car len(X_abalone) == 4177 est premier donc on ne peut pas split ...
+X_train_abalone = np.delete(X_train_abalone, 0, axis=0)
+y_train_abalone = np.delete(y_train_abalone, 0, axis=0)
 
 # Encode Iris y
 le = labelEncoder()
@@ -70,21 +76,26 @@ y_train_iris = le.fit_transform(y_train_iris)
 y_test_iris = le.transform(y_test_iris)
 
 # Validation croisée
-N_split_iris = 6 # --> Pas toutes les classes das les splits si > 6
-N_split_wine = 10
-N_split_abalone = 10
+N_split_iris = 10
+N_split_wine = 3 # --> Trop long
+N_split_abalone = 3 # --> Trop long
 
 print('IRIS')
-K_opti_iris = cv_knn(N_split_iris, X_train_iris, y_train_iris, X_test_iris, y_test_iris, K_values)
-print('WIN')
-K_opti_wine = cv_knn(N_split_wine, X_train_wine, y_train_wine, X_test_wine, y_test_wine, K_values)
+K_opti_iris = cv_knn(N_split_iris, X_train_iris, y_train_iris, X_test_iris, y_test_iris, K_values_iris)
+print('WINE')
+K_opti_wine = cv_knn(N_split_wine, X_train_wine, y_train_wine, X_test_wine, y_test_wine, K_values_wine)
 print('ABALONE')
-K_opti_abalone = cv_knn(N_split_abalone, X_train_abalone, y_train_abalone, X_test_abalone, y_test_abalone, K_values)
+K_opti_abalone = cv_knn(N_split_abalone, X_train_abalone, y_train_abalone, X_test_abalone, y_test_abalone, K_values_abalone)
 
 # Entrainez votre classifieur
-clf_Knn = Knn(K=K_opti_iris)
-clf_Knn.train(X_train_iris, y_train_iris)
+clf_Knn_iris = Knn(K=K_opti_iris)
+clf_Knn_iris.train(X_train_iris, y_train_iris)
 
+clf_Knn_wine = Knn(K=K_opti_wine)
+clf_Knn_wine.train(X_train_wine, y_train_wine)
+
+clf_Knn_abalone = Knn(K=K_opti_abalone)
+clf_Knn_abalone.train(X_train_abalone, y_train_abalone)
 """
 Après avoir fait l'entrainement, évaluez votre modèle sur 
 les données d'entrainement.
@@ -98,17 +109,17 @@ IMPORTANT :
 """
 # Tester votre classifieur
 print('---------- IRIS TRAIN ----------')
-evaluate_train = clf_Knn.evaluate(X_train_iris, y_train_iris)
+evaluate_train = clf_Knn_iris.evaluate(X_train_iris, y_train_iris)
 for e in evaluate_train:
     print(f'{e}\n {evaluate_train[e]}')
 
-print('---------- WIN TRAIN ----------')
-evaluate_train = clf_Knn.evaluate(X_train_iris, y_train_iris)
+print('---------- WINE TRAIN ----------')
+evaluate_train = clf_Knn_wine.evaluate(X_train_iris, y_train_iris)
 for e in evaluate_train:
     print(f'{e}\n {evaluate_train[e]}')
 
 print('---------- ABALONE TRAIN ----------')
-evaluate_train = clf_Knn.evaluate(X_train_iris, y_train_iris)
+evaluate_train = clf_Knn_abalone.evaluate(X_train_iris, y_train_iris)
 for e in evaluate_train:
     print(f'{e}\n {evaluate_train[e]}')
 """
@@ -122,17 +133,17 @@ IMPORTANT :
     - le F1-score
 """
 print('---------- IRIS TEST ----------')
-evaluate_test = clf_Knn.evaluate(X_test_iris, y_test_iris)
+evaluate_test = clf_Knn_iris.evaluate(X_test_iris, y_test_iris)
 for e in evaluate_test:
     print(f'{e}\n {evaluate_test[e]}')
 
-print('---------- WIN TEST ----------')
-evaluate_test = clf_Knn.evaluate(X_test_iris, y_test_iris)
+print('---------- WINE TEST ----------')
+evaluate_test = clf_Knn_wine.evaluate(X_test_iris, y_test_iris)
 for e in evaluate_test:
     print(f'{e}\n {evaluate_test[e]}')
 
 print('---------- ABALONE TEST ----------')
-evaluate_test = clf_Knn.evaluate(X_test_iris, y_test_iris)
+evaluate_test = clf_Knn_abalone.evaluate(X_test_iris, y_test_iris)
 for e in evaluate_test:
     print(f'{e}\n {evaluate_test[e]}')
 
