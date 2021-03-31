@@ -128,12 +128,12 @@ for e in evaluate_train:
     print(f'{e}\n {evaluate_train[e]}')
 
 print('---------- WINE TRAIN ----------')
-evaluate_train = clf_Knn_wine.evaluate(X_train_iris, y_train_iris)
+evaluate_train = clf_Knn_wine.evaluate(X_train_wine, y_train_wine)
 for e in evaluate_train:
     print(f'{e}\n {evaluate_train[e]}')
 
 print('---------- ABALONE TRAIN ----------')
-evaluate_train = clf_Knn_abalone.evaluate(X_train_iris, y_train_iris)
+evaluate_train = clf_Knn_abalone.evaluate(X_train_abalone, y_train_abalone)
 for e in evaluate_train:
     print(f'{e}\n {evaluate_train[e]}')
 """
@@ -152,12 +152,12 @@ for e in evaluate_test:
     print(f'{e}\n {evaluate_test[e]}')
 
 print('---------- WINE TEST ----------')
-evaluate_test = clf_Knn_wine.evaluate(X_test_iris, y_test_iris)
+evaluate_test = clf_Knn_wine.evaluate(X_test_wine, y_test_wine)
 for e in evaluate_test:
     print(f'{e}\n {evaluate_test[e]}')
 
 print('---------- ABALONE TEST ----------')
-evaluate_test = clf_Knn_abalone.evaluate(X_test_iris, y_test_iris)
+evaluate_test = clf_Knn_abalone.evaluate(X_test_abalone, y_test_abalone)
 for e in evaluate_test:
     print(f'{e}\n {evaluate_test[e]}')
 
