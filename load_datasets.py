@@ -1,7 +1,23 @@
 import numpy as np
 import random
 
-def load_iris_dataset(train_ratio):
+def train_test_split(X, y, train_size, seed, shuffle):
+    assert len(X) == len(y)
+    
+    if shuffle:
+        random.seed(seed)
+        random.shuffle(X)
+        random.shuffle(y)
+    
+    X_train = X[:int((len(X)+1)*(train_size))]
+    X_test = X[int((len(X)+1)*(train_size)):]
+
+    y_train = y[:int((len(y)+1)*(train_size))]
+    y_test = y[int((len(y)+1)*(train_size)):]
+
+    return X_train, X_test, y_train, y_test
+
+def load_iris_dataset(train_ratio=0.7, seed=69, shuffle=True):
     """Cette fonction a pour but de lire le dataset Iris
 
     Args:
@@ -26,32 +42,28 @@ def load_iris_dataset(train_ratio):
           que : test_labels[i] est l'etiquette pour l'exemple test[i]
     """
     
-    random.seed(1) # Pour avoir les meme nombres aléatoires à chaque initialisation.
+    random.seed(69) # Pour avoir les meme nombres aléatoires à chaque initialisation.
     
     # Vous pouvez utiliser des valeurs numériques pour les différents types de classes, tel que :
-    conversion_labels = {'Iris-setosa': 0, 'Iris-versicolor' : 1, 'Iris-virginica' : 2}
+    # conversion_labels = {'Iris-setosa': 0, 'Iris-versicolor' : 1, 'Iris-virginica' : 2}
+    # Nous utiliseront le labelEncoder.py
     
     # Le fichier du dataset est dans le dossier datasets en attaché 
-    f = open('datasets/bezdekIris.data', 'r')
+    X, y = [], []
+    with open('datasets/bezdekIris.data', 'r') as f:
+        for line in f:
+            X.append(line.rstrip().split(',')[:4])
+            y.append(line.rstrip().split(',')[4])
+    f.close()
     
+    X = np.array(X, dtype='float64')
+    y = np.array(y, dtype='str')
     
-    # TODO : le code ici pour lire le dataset
-    
-    # REMARQUE très importante : 
-	# remarquez bien comment les exemples sont ordonnés dans 
-    # le fichier du dataset, ils sont ordonnés par type de fleur, cela veut dire que 
-    # si vous lisez les exemples dans cet ordre et que si par exemple votre ration est de 60%,
-    # vous n'allez avoir aucun exemple du type Iris-virginica pour l'entrainement, pensez
-    # donc à utiliser la fonction random.shuffle pour melanger les exemples du dataset avant de séparer
-    # en train et test.
-       
-    
-    # Tres important : la fonction doit retourner 4 matrices (ou vecteurs) de type Numpy. 
-    return (train, train_labels, test, test_labels)
+    train, train_labels, test, test_labels = train_test_split(X, y, train_ratio, seed, shuffle)
+
+    return train, train_labels, test, test_labels
 	
-	
-	
-def load_wine_dataset(train_ratio):
+def load_wine_dataset(train_ratio=0.7, seed=69, shuffle=True):
     """Cette fonction a pour but de lire le dataset Binary Wine quality
 
     Args:
@@ -77,16 +89,21 @@ def load_wine_dataset(train_ratio):
     random.seed(1) # Pour avoir les meme nombres aléatoires à chaque initialisation.
 
     # Le fichier du dataset est dans le dossier datasets en attaché 
-    f = open('datasets/binary-winequality-white.csv', 'r')
-
-	
-    # TODO : le code ici pour lire le dataset
+    X, y = [], []
+    with open('datasets/binary-winequality-white.csv', 'r') as f:
+        for line in f:
+            X.append(line.rstrip().split(',')[:11])
+            y.append(line.rstrip().split(',')[11])
+    f.close()
     
-	
-	# La fonction doit retourner 4 structures de données de type Numpy.
-    return (train, train_labels, test, test_labels)
+    X = np.array(X, dtype='float64')
+    y = np.array(y, dtype='int64')
+    
+    train, train_labels, test, test_labels = train_test_split(X, y, train_ratio, seed, shuffle)
+    
+    return train, train_labels, test, test_labels
 
-def load_abalone_dataset(train_ratio):
+def load_abalone_dataset(train_ratio=0.7, seed=69, shuffle=True):
     """
     Cette fonction a pour but de lire le dataset Abalone-intervalles
 
@@ -109,5 +126,20 @@ def load_abalone_dataset(train_ratio):
         - test_labels : contient les étiquettes pour chaque exemple dans test, de telle sorte
           que : test_labels[i] est l'etiquette pour l'exemple test[i]
     """
-    f = open('datasets/abalone-intervalles.csv', 'r') # La fonction doit retourner 4 matrices (ou vecteurs) de type Numpy.
-    return (train, train_labels, test, test_labels)
+    X, y = [], []
+    sexes = {'M': 0, 'F': 1, 'I': 2}
+    with open('datasets/abalone-intervalles.csv', 'r') as f:
+        for line in f:
+            line = line.rstrip().split(',')
+            line[0] = sexes[line[0]]
+            line[8] = float(line[8])
+            X.append(line[:8])
+            y.append(line[8])
+    f.close()
+    
+    X = np.array(X, dtype='float64')
+    y = np.array(y, dtype='int64')
+        
+    train, train_labels, test, test_labels = train_test_split(X, y, train_ratio, seed, shuffle)
+
+    return train, train_labels, test, test_labels
