@@ -42,6 +42,18 @@ def cv_knn(N_split, X_train, y_train, X_test, y_test, K_values):
     print(max(scores.items(), key=operator.itemgetter(1)))
     return max(scores.items(), key=operator.itemgetter(1))[0]
 
+def cv_NaivesBayes_init_train(X_train, y_train):
+    X_train = np.matrix(X_train)
+    clf = NaiveBayes()
+    clf.train(X_train, y_train)
+    return clf
+    
+
+def cv_NaivesBayes_evaluate(clf, X_test, y_test):
+    evaluation = clf.evaluate(X_test, y_test)
+    return evaluation
+
+
 """
 C'est le fichier main duquel nous allons tout lancer
 Vous allez dire en commentaire c'est quoi les paramètres que vous avez utilisés
@@ -52,7 +64,9 @@ En gros, vous allez :
 4- Le tester
 
 """
-
+###############################################################################################
+#                                             KNN                                             #
+###############################################################################################
 # Initialisez vos paramètres
 K_values_iris = [k for k in range(1, 11)]
 K_values_wine = [k for k in range(1, 51)]
@@ -148,3 +162,81 @@ for e in evaluate_test:
     print(f'{e}\n {evaluate_test[e]}')
 
 
+
+
+###############################################################################################
+#                                        Naives Bayes                                         #
+###############################################################################################
+
+# Charger/lire les datasets, reset à 0 car modifcations lors de KNN
+X_train_iris, y_train_iris, X_test_iris, y_test_iris = load_iris_dataset(train_ratio=0.7, seed=69, shuffle=True)
+X_train_wine, y_train_wine, X_test_wine, y_test_wine = load_wine_dataset(train_ratio=0.7, seed=42, shuffle=False)
+X_train_abalone, y_train_abalone, X_test_abalone, y_test_abalone = load_abalone_dataset(train_ratio=0.7, seed=42, shuffle=False)
+
+# Encode Iris y
+le = labelEncoder()
+y_train_iris = le.fit_transform(y_train_iris)
+y_test_iris = le.transform(y_test_iris)
+
+# Initialiser et entrainer les classifieurs
+clf_nb_iris = cv_NaivesBayes_init_train(X_train_iris, y_train_iris)
+clf_nb_abalone = cv_NaivesBayes_init_train(X_train_abalone, y_train_abalone)
+clf_nb_wine = cv_NaivesBayes_init_train(X_train_wine, y_train_wine)
+
+# Evaluer le classifieur sur les données de train
+evaluation_nb_iris_train = cv_NaivesBayes_evaluate(clf_nb_iris, X_train_iris, y_train_iris)
+evaluation_nb_abalone_train = cv_NaivesBayes_evaluate(clf_nb_abalone, X_train_abalone, y_train_abalone)
+evaluation_nb_wine_train = cv_NaivesBayes_evaluate(clf_nb_wine, X_train_wine, y_train_wine)
+
+# Evaluer le classifieur sur les données de test
+evaluation_nb_iris = cv_NaivesBayes_evaluate(clf_nb_iris, X_test_iris, y_test_iris)
+evaluation_nb_abalone = cv_NaivesBayes_evaluate(clf_nb_abalone, X_test_abalone, y_test_abalone)
+evaluation_nb_wine = cv_NaivesBayes_evaluate(clf_nb_wine, X_test_wine, y_test_wine)
+
+"""
+Après avoir fait l'entrainement, évaluez votre modèle sur 
+les données d'entrainement.
+IMPORTANT : 
+    Vous devez afficher ici avec la commande print() de python,
+    - la matrice de confusion (confusion matrix)
+    - l'accuracy
+    - la précision (precision)
+    - le rappel (recall)
+    - le F1-score
+"""
+# Affiche résultats pour train
+print('---------- IRIS TRAIN ----------')
+for e in evaluation_nb_iris_train:
+    print(f'{e}\n {evaluation_nb_iris_train[e]}')
+
+print('---------- WINE TRAIN ----------')
+for e in evaluation_nb_wine_train:
+    print(f'{e}\n {evaluation_nb_wine_train[e]}')
+
+print('---------- ABALONE TRAIN ----------')
+for e in evaluation_nb_abalone_train:
+    print(f'{e}\n {evaluation_nb_abalone_train[e]}')
+
+
+"""
+Finalement, évaluez votre modèle sur les données de test.
+IMPORTANT : 
+    Vous devez afficher ici avec la commande print() de python,
+    - la matrice de confusion (confusion matrix)
+    - l'accuracy
+    - la précision (precision)
+    - le rappel (recall)
+    - le F1-score
+"""
+# Affiche résultats pour train
+print('---------- IRIS TEST ----------')
+for e in evaluation_nb_iris:
+    print(f'{e}\n {evaluation_nb_iris[e]}')
+
+print('---------- WINE TEST ----------')
+for e in evaluation_nb_wine:
+    print(f'{e}\n {evaluation_nb_wine[e]}')
+
+print('---------- ABALONE TEST ----------')
+for e in evaluation_nb_abalone:
+    print(f'{e}\n {evaluation_nb_abalone[e]}')

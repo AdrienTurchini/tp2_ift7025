@@ -42,9 +42,9 @@ class NaiveBayes: #nom de la class à changer
         self.n = train.shape[0] # le nombre d'exemple d'entrainement dans le dataset
         self.m = train.shape[1] # le mobre d'attribus
 
-        freq_byClass = [] # tableau des fréquences de chaque classe parmis la totalité des données
+        self.freq_byClass = [] # tableau des fréquences de chaque classe parmis la totalité des données
         for nb in count:
-            freq_byClass.append(nb/self.n)
+            self.freq_byClass.append(nb/self.n)
         
         data_byClass = [] # tableau des sous-datasets selon chaque classe 
         for class_i in self.classes:
@@ -79,8 +79,8 @@ class NaiveBayes: #nom de la class à changer
             mean = self.mean_byClass[i][0]
             var = self.var_byClass[i][0]
             probaClass_i = self.freq_byClass[i] # probabilité de la classe i
-            for i, (meanAttribute, varAttribute) in enumerate(zip(mean, var)):
-                probaConditionelle = self.calculProba(x[i], meanAttribute, varAttribute)
+            for idx, (meanAttribute, varAttribute) in enumerate(zip(mean, var)):
+                probaConditionelle = self.calculProba(x[idx], meanAttribute, varAttribute)
                 probaClass_i *= probaConditionelle
             probaPosteriori.append(probaClass_i)
 
@@ -89,19 +89,92 @@ class NaiveBayes: #nom de la class à changer
 
         return classToReturn
         
+    def confusion_matrix(self, y_pred, y):
+        """
+        retourne la matrice de confusion
+        """
+        cf = np.zeros((len(self.classes), len(self.classes)), dtype='int64')
+        for yi, yhat in zip(y, y_pred):
+            for i in range(len(self.classes)):
+                for j in range(len(self.classes)):
+                    if yi == i and yhat == j:
+                        cf[i, j] += 1
+        return cf
+
+    def mean_precision(self, cf):
+        self.precisions = []
+        for i, row in enumerate(cf):
+            self.precisions.append(row[i] / np.sum(row))
+        return np.mean(self.precisions)
+
+    def mean_recall(self, cf):
+        self.recalls = []
+        for i, row in enumerate(np.transpose(cf)):
+            self.recalls.append(row[i] / np.sum(row))
+        return np.mean(self.recalls)
+
+    def mean_F1_score(self):
+        assert len(self.precisions) and len(self.recalls)
+        
+        self.F1_scores = []
+        for precision, recall in zip(self.precisions, self.recalls):
+            self.F1_scores.append((2 * precision * recall) / (precision + recall))
+        return np.mean(self.F1_scores)
+
     def evaluate(self, X, y):
         """
         c'est la méthode qui va evaluer votre modèle sur les données X
         l'argument X est une matrice de type Numpy et de taille nxm, avec 
         n : le nombre d'exemple de test dans le dataset
         m : le mobre d'attribus (le nombre de caractéristiques)
-        
+
         y : est une matrice numpy de taille nx1
-        
+
         vous pouvez rajouter d'autres arguments, il suffit juste de
         les expliquer en commentaire
+
+        F1 = (2 * self.precision() * self.recall()) / (self.precision() + self.recall())
+
         """
+        
+        y_pred = []
+
+        for i in X:
+            y_pred.append(self.predict(i))
+        cf = self.confusion_matrix(y_pred, y)
+        # Metrics
+        accuracy = np.trace(cf) / len(y)
+        precision = self.mean_precision(cf)
+        recall = self.mean_recall(cf)
+        F1_score = self.mean_F1_score()
+            
+        return {'mean_accuracy': accuracy, 
+                'mean_precision': precision, 
+                'mean_recall': recall, 
+                'mean_F1-score': F1_score, 
+                'Confusion_matrix': cf
+                }
         
     
     # Vous pouvez rajouter d'autres méthodes et fonctions,
     # il suffit juste de les commenter.
+
+'''from load_datasets import load_iris_dataset
+from load_datasets import load_wine_dataset
+from load_datasets import load_abalone_dataset
+
+X_train_iris, y_train_iris, X_test_iris, y_test_iris = load_iris_dataset(train_ratio=0.7, seed=42, shuffle=True)
+X_train_wine, y_train_wine, X_test_wine, y_test_wine = load_wine_dataset(train_ratio=0.7, seed=42, shuffle=True)
+X_train_abalone, y_train_abalone, X_test_abalone, y_test_abalone = load_abalone_dataset(train_ratio=0.7, seed=42, shuffle=True)
+
+from labelEncoder import labelEncoder
+# Encode Iris y
+le = labelEncoder()
+y_train_iris = le.fit_transform(y_train_iris)
+y_test_iris = le.transform(y_test_iris)
+
+X_train_iris = np.matrix(X_train_iris)
+clf = NaiveBayes()
+clf.train(X_train_iris, y_train_iris)
+
+print(clf.evaluate(X_test_iris, y_test_iris))'''

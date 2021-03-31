@@ -72,17 +72,24 @@ class  NaiveBayes:
                 probaClass_i *= probaConditionelle
             probaPosteriori.append(probaClass_i)
 
-        print(probaPosteriori)
         probaPosterioriMax = np.max(probaPosteriori) # on cherche la probabilité à poseteriori maximale
-        classToReturn = self.classes[probaPosteriori.index(probaPosterioriMax)] 
+        classToReturn = self.classes[probaPosteriori.index(probaPosterioriMax)] # on cherche la classe associée à l'index de la proba a posteriori maximale
 
-        print(classToReturn)
+        return classToReturn
             
 
 
         
 
-
+print(X)
 clf = NaiveBayes()
 clf.train(train = X, train_labels= y)
-clf.predict(data)
+print(clf.predict(data))
+
+
+
+
+
+
+
+
