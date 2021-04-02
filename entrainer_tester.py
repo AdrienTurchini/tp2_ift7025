@@ -161,8 +161,33 @@ evaluate_test = clf_Knn_abalone.evaluate(X_test_abalone, y_test_abalone)
 for e in evaluate_test:
     print(f'{e}\n {evaluate_test[e]}')
 
+# SKLEARN
 
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix
 
+neigh_iris = KNeighborsClassifier(n_neighbors=K_opti_iris)
+neigh_wine = KNeighborsClassifier(n_neighbors=K_opti_wine)
+neigh_abalone = KNeighborsClassifier(n_neighbors=K_opti_abalone)
+
+neigh_iris.fit(X_train_iris, y_train_iris)
+neigh_wine.fit(X_train_wine, y_train_wine)
+neigh_abalone.fit(X_train_abalone, y_train_abalone)
+
+y_pred_iris = neigh_iris.predict(X_test_iris)
+score_iris = neigh_iris.score(X_test_iris, y_test_iris)
+print(f'sklearn matrice de confusion iris : \n {confusion_matrix(y_test_iris, y_pred_iris)}')
+print(f'sklearn précision iris = {score_iris}')
+
+y_pred_wine = neigh_wine.predict(X_test_wine)
+score_wine = neigh_wine.score(X_test_wine, y_test_wine)
+print(f'sklearn matrice de confusion iris : \n {confusion_matrix(y_test_wine, y_pred_wine)}')
+print(f'sklearn précision iris = {score_wine}')
+
+y_pred_abalone = neigh_abalone.predict(X_test_abalone)
+score_abalone = neigh_abalone.score(X_test_abalone, y_test_abalone)
+print(f'sklearn matrice de confusion iris : \n {confusion_matrix(y_test_abalone, y_pred_abalone)}')
+print(f'sklearn précision iris = {score_abalone}')
 
 ###############################################################################################
 #                                        Naives Bayes                                         #
