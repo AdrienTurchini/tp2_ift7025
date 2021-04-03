@@ -64,6 +64,7 @@ En gros, vous allez :
 4- Le tester
 
 """
+
 ###############################################################################################
 #                                             KNN                                             #
 ###############################################################################################
@@ -110,6 +111,7 @@ clf_Knn_wine.train(X_train_wine, y_train_wine)
 
 clf_Knn_abalone = Knn(K=K_opti_abalone)
 clf_Knn_abalone.train(X_train_abalone, y_train_abalone)
+
 """
 Après avoir fait l'entrainement, évaluez votre modèle sur 
 les données d'entrainement.
@@ -121,6 +123,7 @@ IMPORTANT :
     - le rappel (recall)
     - le F1-score
 """
+
 # Tester votre classifieur
 print('---------- IRIS TRAIN ----------')
 evaluate_train = clf_Knn_iris.evaluate(X_train_iris, y_train_iris)
@@ -136,6 +139,7 @@ print('---------- ABALONE TRAIN ----------')
 evaluate_train = clf_Knn_abalone.evaluate(X_train_abalone, y_train_abalone)
 for e in evaluate_train:
     print(f'{e}\n {evaluate_train[e]}')
+
 """
 Finalement, évaluez votre modèle sur les données de test.
 IMPORTANT : 
@@ -146,6 +150,7 @@ IMPORTANT :
     - le rappel (recall)
     - le F1-score
 """
+
 print('---------- IRIS TEST ----------')
 evaluate_test = clf_Knn_iris.evaluate(X_test_iris, y_test_iris)
 for e in evaluate_test:
@@ -189,9 +194,11 @@ score_abalone = neigh_abalone.score(X_test_abalone, y_test_abalone)
 print(f'sklearn matrice de confusion iris : \n {confusion_matrix(y_test_abalone, y_pred_abalone)}')
 print(f'sklearn précision iris = {score_abalone}')
 
+
 ###############################################################################################
 #                                        Naives Bayes                                         #
 ###############################################################################################
+print("\n\n ------- NAIVES BAYES -------\n\n")
 
 # Charger/lire les datasets, reset à 0 car modifcations lors de KNN
 X_train_iris, y_train_iris, X_test_iris, y_test_iris = load_iris_dataset(train_ratio=0.7, seed=69, shuffle=True)
@@ -265,3 +272,69 @@ for e in evaluation_nb_wine:
 print('---------- ABALONE TEST ----------')
 for e in evaluation_nb_abalone:
     print(f'{e}\n {evaluation_nb_abalone[e]}')
+
+
+print("\n\nSKLEARN GaussianNB\n\n")
+
+# SKLEARN
+
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix
+
+def mean_precision(cf):
+    precisions = []
+    for i, row in enumerate(cf):
+        precisions.append(row[i] / np.sum(row))
+    return np.mean(precisions)
+
+def mean_recall(cf):
+    recalls = []
+    for i, row in enumerate(np.transpose(cf)):
+        recalls.append(row[i] / np.sum(row))
+    return np.mean(recalls)
+
+def mean_F1_score(precision, recall):
+
+    F1_scores = ((2 * precision * recall) / (precision + recall))
+    return F1_scores
+
+def printScores(cf, y_pred):
+    accuracy = np.trace(cf) / len(y_pred)
+    precision = mean_precision(cf)
+    recall = mean_recall(cf)
+    F1_score = mean_F1_score(precision, recall)
+    print("Accuracy : ", accuracy)
+    print("Precision : ", precision)
+    print("Rappel : ", recall)
+    print("Score F1 : ", F1_score)
+
+clf_nb2_iris = GaussianNB()
+clf_nb2_wine = GaussianNB()
+clf_nb2_abalone = GaussianNB()
+
+clf_nb2_iris.fit(X_train_iris, y_train_iris)
+clf_nb2_wine.fit(X_train_wine, y_train_wine)
+clf_nb2_abalone.fit(X_train_abalone, y_train_abalone)
+
+y_pred2_iris = clf_nb2_iris.predict(X_test_iris)
+y_pred2_wine = clf_nb2_wine.predict(X_test_wine)
+y_pred2_abalone = clf_nb2_abalone.predict(X_test_abalone)
+
+score2_iris = clf_nb2_iris.score(X_test_iris, y_test_iris)
+cf = confusion_matrix(y_test_iris, y_pred2_iris)
+print("\n IRIS \n")
+print(f'sklearn matrice de confusion Iris : \n {cf}')
+printScores(cf, y_pred2_iris)
+
+score2_wine = clf_nb2_wine.score(X_test_wine, y_test_wine)
+cf = confusion_matrix(y_test_wine, y_pred2_wine)
+print("\n\n WINE \n")
+print(f'sklearn matrice de confusion Wine : \n {cf}')
+printScores(cf, y_pred2_wine)
+
+score2_abalone = clf_nb2_abalone.score(X_test_abalone, y_test_abalone)
+cf = confusion_matrix(y_test_abalone, y_pred2_abalone)
+print("\n\n ABALONE \n")
+print(f'sklearn matrice de confusion Abalone : \n {cf}')
+printScores(cf, y_pred2_abalone)
+
